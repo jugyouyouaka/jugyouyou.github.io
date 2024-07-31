@@ -1,30 +1,33 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Content-Style-Type" content="text/css">
-<meta http-equiv="Content-Script-Type" content="text/javascript">
-<title>Spoken Dialog by Javascript</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <title>Spoken Dialog by Javascript</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #resultOutput { margin-top: 20px; }
+    </style>
 </head>
 <body>
 
 <h1>認識結果に対応するウェブページを表示してみよう</h1>
 
 <p>
-<button id="startButton">start</button>
-<button id="stopButton">stop</button>
+    <button id="startButton">start</button>
+    <button id="stopButton">stop</button>
 </p>
 
-<p>
 <div id="resultOutput"></div>
-</p>
 
 <script>
 // 応答の定義（ハッシュ）    
 var response = {
     "課題やる": ["頑張れよ", "https://moodle2024.wakayama-u.ac.jp/2024/my/", "https://www.notion.so/"],
-    "先生 お願いします": ["任せろ", "https://chatgpt.com/","https://www.deepl.com/ja/translator","https://gemini.google.com/app?hl=ja"],
-    "今日の時間割は？": ["京都府の天気予報を表示します", "https://weather.yahoo.co.jp/weather/jp/26/"],
+    "先生 お願いします": ["任せろ", "https://chatgpt.com/", "https://www.deepl.com/ja/translator", "https://gemini.google.com/app?hl=ja"],
+    "今日の時間割は？": ["今日の時間割は、", ""], // 空の文字列を初期化
     "奈良の天気": ["奈良県の天気予報を表示します", "https://weather.yahoo.co.jp/weather/jp/29/"],
     "兵庫の天気": ["兵庫県の天気予報を表示します", "https://weather.yahoo.co.jp/weather/jp/28/"]
 };
@@ -33,18 +36,18 @@ const startButton = document.querySelector('#startButton'); // 開始ボタン
 const stopButton = document.querySelector('#stopButton'); // 停止ボタン
 const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
 
-if (!'SpeechSynthesisUtterance' in window) {
+if (!('SpeechSynthesisUtterance' in window)) {
     alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
 }
+
 const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
-//tts.text = textForm.value; // テキストを設定
-tts.lang = "ja-JP"; // 言語(日本語)、英語の場合はen-US
+tts.lang = "ja-JP"; // 言語(日本語)
 tts.rate = 1.0; // 速度
 tts.pitch = 1.0; // 声の高さ
 tts.volume = 1.0; // 音量
 
 SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-if (!'SpeechRecognition' in window) {
+if (!('SpeechRecognition' in window)) {
     alert("あなたのブラウザはSpeech Recognition APIに未対応です。");
 }
 
@@ -55,37 +58,81 @@ asr.continuous = true; // 継続入力をオン
 
 let output = ''; // 出力
 
+// CSVまたはTXTファイルを読み込む関数
+function loadScheduleFile(file, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.overrideMimeType("application/json");
+    xhr.open("GET", file, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            callback(xhr.responseText);
+        }
+    };
+    xhr.send(null);
+}
+
+// 今日の曜日を取得し、対応する時間割を返す関数
+function getScheduleForToday(scheduleData) {
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+    const today = new Date().getDay();
+    const todayKanji = days[today];
+
+    const lines = scheduleData.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const fields = lines[i].split(',');
+        if (fields[0] === todayKanji) {
+            return fields.slice(1).join('、'); // 時間割の要素を結合
+        }
+    }
+    return "時間割が見つかりませんでした"; // 見つからない場合のメッセージ
+}
+
 // 認識結果が出力されたときのイベントハンドラ
-asr.onresult = function(event){
+asr.onresult = function(event) {
     let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
 
     let output_not_final = '';
     if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
-	    asr.abort(); // 音声認識を停止
-	    let ret = response[transcript];
+        asr.abort(); // 音声認識を停止
+        let ret = response[transcript];
 
-        let answer;
-        let webpages = [];
-        
-        if(typeof ret == 'undefined'){
-	        answer = "ごめんなさい。わかりません。";
-    	}else{
-            answer = ret[0];
-            webpages = ret.slice(1); // 配列の2番目以降の要素をすべて取得
-        }
+        if (transcript === "今日の時間割は？") {
+            loadScheduleFile('schedule.csv', function(data) {
+                const schedule = getScheduleForToday(data);
+                response["今日の時間割は？"][1] = schedule; // 時間割を設定
+                tts.text = response["今日の時間割は？"][0] + schedule; // 読み上げるテキストを設定
+                output += transcript + ' => ' + tts.text + '<br>';
+                resultOutput.innerHTML = output;
 
-        output += transcript + ' => ' + answer + '<br>';
-
-	    tts.text = answer;
-	    // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
-	    tts.onend = function(event){
-            webpages.forEach(function(page) {
-                window.open(page, '_blank'); // 新しいタブでページを開く
+                tts.onend = function(event) {
+                    asr.start(); // 音声認識を再開
+                }
+                speechSynthesis.speak(tts); // 再生
             });
-            asr.start(); // 音声認識を再開 
-	    }
+        } else {
+            let answer;
+            let webpages = [];
 
-	    speechSynthesis.speak(tts); // 再生
+            if (typeof ret === 'undefined') {
+                answer = "ごめんなさい。わかりません。";
+            } else {
+                answer = ret[0];
+                webpages = ret.slice(1); // 配列の2番目以降の要素をすべて取得
+            }
+
+            output += transcript + ' => ' + answer + '<br>';
+            tts.text = answer;
+
+            // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
+            tts.onend = function(event) {
+                webpages.forEach(function(page) {
+                    window.open(page, '_blank'); // 新しいタブでページを開く
+                });
+                asr.start(); // 音声認識を再開 
+            }
+
+            speechSynthesis.speak(tts); // 再生
+        }
     } else { // 結果がまだ未確定のとき
         output_not_final = '<span style="color:#ddd;">' + transcript + '</span>';
     }
