@@ -3,32 +3,96 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Maps Address Plot with Travel Radius</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
         #map, #results, #suitScreen, #inputScreen {
             display: none;
         }
         #titleScreen {
             display: block;
             text-align: center;
-            margin-top: 50px;
+            margin: 20px;
         }
         #map {
-            height: 500px;
+            height: 300px; /* スマホの画面サイズに合わせた高さ */
             width: 100%;
         }
         #suitScreen {
             margin-top: 20px;
         }
         #titleScreen img {
-            width: 300px; /* Adjust the size as needed */
+            width: 80%; /* ロゴ画像を調整 */
+            max-width: 300px; /* 最大幅を設定 */
+        }
+        button {
+            padding: 15px 25px; /* ボタンのサイズを大きく */
+            font-size: 18px; /* フォントサイズを大きく */
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff; /* ボタンの背景色を設定 */
+            color: #fff; /* ボタンの文字色を設定 */
+            border-radius: 5px; /* ボタンの角を丸くする */
+            display: block; /* ボタンをブロック表示 */
+            width: calc(100% - 40px); /* ボタンを画面幅いっぱいに */
+            box-sizing: border-box; /* パディングとボーダーを含める */
+        }
+        button:hover {
+            background-color: #0056b3; /* ホバー時の背景色 */
+        }
+        h1, h2 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        label, input, span {
+            display: block;
+            margin: 10px;
+            font-size: 18px; /* フォントサイズを大きく */
+        }
+        input[type="range"] {
+            width: 90%; /* スライダーの幅を広げる */
+            margin: 10px auto;
+            -webkit-appearance: none; /* デフォルトのスタイルをリセット */
+            height: 8px; /* スライダーの高さを設定 */
+            background: #ddd; /* スライダーの背景色 */
+            border-radius: 5px; /* スライダーの角を丸くする */
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; /* デフォルトのスタイルをリセット */
+            width: 25px; /* サムの幅 */
+            height: 25px; /* サムの高さ */
+            background: #007bff; /* サムの背景色 */
+            border-radius: 50%; /* サムを丸くする */
+            cursor: pointer; /* サムをクリック可能にする */
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 25px; /* サムの幅 */
+            height: 25px; /* サムの高さ */
+            background: #007bff; /* サムの背景色 */
+            border-radius: 50%; /* サムを丸くする */
+            cursor: pointer; /* サムをクリック可能にする */
+        }
+        #placeList, #history {
+            padding: 0;
+            list-style: none;
+            font-size: 16px; /* フォントサイズを調整 */
+            margin: 10px;
+        }
+        #placeList li, #history li {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div id="titleScreen">
         <img src="logo.png" alt="Logo">
-        <h1></h1>
+        <h1>Google Maps Address Plot</h1>
         <button onclick="startApp()">始める</button>
     </div>
 
@@ -37,10 +101,8 @@
         <label for="timeRange">所要時間（分）:</label>
         <input type="range" id="timeRange" min="0" max="120" step="10" value="60" onchange="updateTimeDisplay()">
         <span id="timeDisplay">60分</span>
-        <br>
         <label for="tollRoads">有料道路を使用する:</label>
         <input type="checkbox" id="tollRoads">
-        <br>
         <button id="proceedButton" onclick="proceedToMap()" style="display: none;">次へ</button>
     </div>
 
@@ -52,8 +114,7 @@
         <ul id="placeList"></ul>
         <div id="history"></div> <!-- 履歴表示用の要素 -->
         <button onclick="goBackToMap()">地図に戻る</button>
-        <!-- <button id="nextScreenButton" onclick="nextScreen('suitScreen')">次へ</button> -->
-        <button onclick="redirectToHiLo()">次へ</button> 追加するボタン
+        <button onclick="redirectToHiLo()">次へ</button>
     </div>
     
     <div id="suitScreen" class="hidden">
