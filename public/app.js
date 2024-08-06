@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     obj[header] = values[index];
                 });
                 console.log('Row data:', obj); // 各行のデータを確認
-                            console.log('CSV Data:', text); // データ全体を表示
 
                 return obj;
             });
