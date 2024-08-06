@@ -25,8 +25,8 @@
             margin: 0;
             padding: 20px;
             position: absolute; /* 絶対配置に変更 */
-            top: 25%; /* 画面の中央より少し上に配置 */
-            transform: translateY(-25%); /* 垂直に中央から少し上に移動 */
+            top: 20%; /* 画面の中央より少し上に配置 */
+            transform: translateY(-20%); /* 垂直に中央から少し上に移動 */
         }
         #map {
             height: 300px; /* スマホの画面サイズに合わせた高さ */
@@ -41,7 +41,7 @@
         button {
             padding: 15px 25px; /* ボタンのサイズを大きく */
             font-size: 18px; /* フォントサイズを大きく */
-            margin: 10px auto; /* ボタンの中央揃え */
+            margin: 15px auto; /* ボタンの中央揃え */
             cursor: pointer;
             border: none;
             background-color: #007bff; /* ボタンの背景色を設定 */
@@ -56,19 +56,20 @@
         }
         h1, h2 {
             font-size: 24px;
-            margin: 10px 0;
+            margin: 15px 0;
         }
         #inputScreen h2 {
             margin-top: 20px; /* タイトルの上にスペースを追加 */
         }
         label, input, span {
             display: block;
-            margin: 10px;
+            margin: 15px 0; /* 要素間のマージンを増やす */
             font-size: 18px; /* フォントサイズを大きく */
         }
         #inputScreen label {
             display: flex;
             align-items: center;
+            margin: 10px 0; /* ラベルの上下にスペースを追加 */
         }
         #inputScreen #timeRange {
             width: 90%; /* スライダーの幅を広げる */
@@ -93,17 +94,14 @@
             border-radius: 50%; /* サムを丸くする */
             cursor: pointer; /* サムをクリック可能にする */
         }
-        #inputScreen label, #inputScreen input {
-            margin-top: 20px; /* ラベルと入力の間にスペースを追加 */
+        #inputScreen .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-top: 20px; /* チェックボックスとラベルの間にスペースを追加 */
         }
         #inputScreen #tollRoads {
             transform: scale(1.5); /* チェックボックスを1.5倍に拡大 */
             margin-right: 10px; /* チェックボックスとラベルの間隔を追加 */
-        }
-        #inputScreen .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            margin-top: 10px; /* 上部にスペースを追加 */
         }
         #placeList, #history {
             padding: 0;
