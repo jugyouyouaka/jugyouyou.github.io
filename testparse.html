@@ -9,21 +9,46 @@
     <h1>CSV Data</h1>
     <pre id="csv-output"></pre>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('places.csv')
-                .then(response => response.text())
-                .then(text => {
-                    const rows = text.split('\n');
-                    const data = rows.map(row => row.split(','));
-                    
-                    // Display the CSV data in a preformatted text block
-                    const output = document.getElementById('csv-output');
-                    output.textContent = data.map(row => row.join(' | ')).join('\n');
-                })
-                .catch(error => {
-                    console.error('Error loading CSV:', error);
-                });
-        });
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
+
+// CSVファイルのパス
+const csvFilePath = path.join(__dirname, 'places.csv');
+
+// 出力先のJSONファイル
+const outputFilePath = path.join(__dirname, 'places.json');
+
+// パースされたデータを格納する配列
+const places = [];
+
+// CSVファイルを読み込み、パースする
+fs.createReadStream(csvFilePath)
+  .pipe(csv())
+  .on('data', (row) => {
+    // データを指定の形式に変換して配列に追加
+    places.push({
+      name: row['名前'],
+      suit: row['ジャンル'],
+      address: row['住所']
+    });
+  })
+  .on('end', () => {
+    console.log('CSV file successfully processed');
+
+    // パースされたデータをJSON形式で出力
+    console.log(places);
+
+    // JSONファイルに書き込む
+    fs.writeFile(outputFilePath, JSON.stringify(places, null, 2), (err) => {
+      if (err) {
+        console.error('Error writing JSON file:', err);
+      } else {
+        console.log('JSON file saved as places.json');
+      }
+    });
+  });
+
     </script>
 </body>
 </html>
