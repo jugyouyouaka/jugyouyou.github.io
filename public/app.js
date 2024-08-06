@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const headers = rows[0].split(',');
 
             console.log('Headers:', headers); // ヘッダーを確認
-            console.log('CSV Data:', text); // データ全体を表示
 
             const data = rows.slice(1).map(row => {
                 const values = row.split(',');
@@ -28,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     obj[header] = values[index];
                 });
                 console.log('Row data:', obj); // 各行のデータを確認
+                            console.log('CSV Data:', text); // データ全体を表示
+
                 return obj;
             });
 
