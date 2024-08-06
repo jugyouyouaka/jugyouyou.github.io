@@ -15,18 +15,28 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/places.csv')
         .then(response => response.text())
         .then(text => {
-            const rows = text.trim().split('\n'); // .trim()で余分な空白行を削除
-            const headers = rows[0].split(',');
+            // CSVデータを行ごとに分割
+            const rows = text.trim().split('\n');
+            console.log('Rows:', rows); // 行の配列をログに出力
 
+            // ヘッダー行を分割して配列にする
+            const headers = rows[0].split(',').map(header => header.trim());
+            console.log('Headers:', headers); // ヘッダーをログに出力
+
+            // データ行をパースしてオブジェクトに変換
             const data = rows.slice(1).map(row => {
-                const values = row.split(',');
+                const values = row.split(',').map(value => value.trim()); // 各値をトリム
                 let obj = {};
                 headers.forEach((header, index) => {
                     obj[header] = values[index];
                 });
                 return obj;
             });
+            
+            // パースしたデータをログに出力
+            console.log('Parsed Data:', data);
 
+            // 必要な形式に変換
             places = data.map(place => ({
                 name: place['名前'],
                 suit: place['ジャンル'],
