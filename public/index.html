@@ -69,18 +69,13 @@
         #inputScreen h2 {
             margin-top: 0; /* タイトルの上のスペースを削除 */
         }
-        label, input, span {
+        label {
             display: block;
-            margin: 15px 0; /* 要素間のマージンを調整 */
             font-size: 18px; /* フォントサイズを大きく */
-        }
-        #inputScreen label {
-            display: flex;
-            align-items: center;
-            margin: 15px 0; /* ラベルの上下にマージンを追加 */
+            margin: 15px 0; /* 上下にマージンを追加 */
         }
         #inputScreen #timeRange {
-            width: 90%; /* スライダーの幅を広げる */
+            width: 70%; /* スライダーの幅を調整 */
             margin: 15px auto; /* 上下に大きなスペースを追加 */
             -webkit-appearance: none; /* デフォルトのスタイルをリセット */
             height: 8px; /* スライダーの高さを設定 */
@@ -102,14 +97,26 @@
             border-radius: 50%; /* サムを丸くする */
             cursor: pointer; /* サムをクリック可能にする */
         }
+        #inputScreen #timeDisplay {
+            display: inline-block;
+            font-size: 18px; /* フォントサイズを大きく */
+            margin-left: 15px; /* ラベルと値の間にスペースを追加 */
+        }
         #inputScreen .checkbox-wrapper {
             display: flex;
             align-items: center;
+            justify-content: center; /* チェックボックスを中央揃え */
             margin-top: 15px; /* チェックボックスとラベルの間にスペースを追加 */
         }
         #inputScreen #tollRoads {
             transform: scale(1.5); /* チェックボックスを1.5倍に拡大 */
             margin-left: 10px; /* チェックボックスとラベルの間隔を追加 */
+        }
+        #inputScreen .checkbox-wrapper label {
+            margin-right: 10px; /* チェックボックスとラベルの間隔を追加 */
+        }
+        #inputScreen .checkbox-wrapper input[type="checkbox"] {
+            margin-left: 5px; /* チェックボックスの左にスペースを追加 */
         }
         #placeList, #history {
             padding: 0;
@@ -141,9 +148,11 @@
 
     <div id="inputScreen">
         <h2>所要時間と有料道路の選択</h2>
-        <label for="timeRange">所要時間（分）:</label>
-        <input type="range" id="timeRange" min="0" max="120" step="10" value="60" onchange="updateTimeDisplay()">
-        <span id="timeDisplay">60分</span>
+        <label for="timeRange">
+            所要時間（分）:
+            <span id="timeDisplay">60分</span> <!-- 所要時間の値をラベルの隣に配置 -->
+        </label>
+        <input type="range" id="timeRange" min="0" max="120" step="10" value="60" oninput="updateTimeDisplay()">
         <div class="checkbox-wrapper">
             <label for="tollRoads">有料道路を使用する:</label>
             <input type="checkbox" id="tollRoads">
