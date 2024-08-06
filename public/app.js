@@ -18,12 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const rows = text.trim().split('\n');
             const headers = rows[0].split(',');
 
+            console.log('Headers:', headers); // ヘッダーを確認
+
             const data = rows.slice(1).map(row => {
-                const values = row.split(',').map(value => value.trim());
+                const values = row.split(',');
                 let obj = {};
                 headers.forEach((header, index) => {
                     obj[header] = values[index];
                 });
+                console.log('Row data:', obj); // 各行のデータを確認
                 return obj;
             });
 
@@ -34,12 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }));
 
             console.log('Places loaded:', places);
-
-            // 初期化時に進むボタンを表示
             document.getElementById('proceedButton').style.display = 'block';
         })
         .catch(error => console.error('Error loading CSV file:', error));
 });
+
 
 function startApp() {
     document.getElementById('titleScreen').style.display = 'none';
