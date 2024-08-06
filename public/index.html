@@ -66,7 +66,11 @@
             margin: 10px;
             font-size: 18px; /* フォントサイズを大きく */
         }
-        input[type="range"] {
+        #inputScreen label {
+            display: flex;
+            align-items: center;
+        }
+        #inputScreen #timeRange {
             width: 90%; /* スライダーの幅を広げる */
             margin: 10px auto;
             -webkit-appearance: none; /* デフォルトのスタイルをリセット */
@@ -74,7 +78,7 @@
             background: #ddd; /* スライダーの背景色 */
             border-radius: 5px; /* スライダーの角を丸くする */
         }
-        input[type="range"]::-webkit-slider-thumb {
+        #inputScreen #timeRange::-webkit-slider-thumb {
             -webkit-appearance: none; /* デフォルトのスタイルをリセット */
             width: 25px; /* サムの幅 */
             height: 25px; /* サムの高さ */
@@ -82,7 +86,7 @@
             border-radius: 50%; /* サムを丸くする */
             cursor: pointer; /* サムをクリック可能にする */
         }
-        input[type="range"]::-moz-range-thumb {
+        #inputScreen #timeRange::-moz-range-thumb {
             width: 25px; /* サムの幅 */
             height: 25px; /* サムの高さ */
             background: #007bff; /* サムの背景色 */
@@ -95,6 +99,11 @@
         #inputScreen #tollRoads {
             transform: scale(1.5); /* チェックボックスを1.5倍に拡大 */
             margin-right: 10px; /* チェックボックスとラベルの間隔を追加 */
+        }
+        #inputScreen .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-top: 10px; /* 上部にスペースを追加 */
         }
         #placeList, #history {
             padding: 0;
@@ -129,8 +138,10 @@
         <label for="timeRange">所要時間（分）:</label>
         <input type="range" id="timeRange" min="0" max="120" step="10" value="60" onchange="updateTimeDisplay()">
         <span id="timeDisplay">60分</span>
-        <label for="tollRoads">有料道路を使用する:</label>
-        <input type="checkbox" id="tollRoads">
+        <div class="checkbox-wrapper">
+            <label for="tollRoads">有料道路を使用する:</label>
+            <input type="checkbox" id="tollRoads">
+        </div>
         <button id="proceedButton" onclick="proceedToMap()" style="display: none;">次へ</button>
     </div>
 
