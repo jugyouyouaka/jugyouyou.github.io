@@ -16,20 +16,18 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split('\n');
-            const headers = rows[0].split(',');
-
-            console.log('Headers:', headers); // ヘッダーを確認
+            const headers = rows[0].split(',').map(header => header.trim()); // ヘッダーから制御文字をトリム
 
             const data = rows.slice(1).map(row => {
-                const values = row.split(',');
+                if (row.trim() === '') return;
+
+                const values = parseCSVRow(row);
                 let obj = {};
                 headers.forEach((header, index) => {
-                    obj[header] = values[index];
+                    obj[header] = values[index].trim(); // 各フィールドから制御文字をトリム
                 });
-                console.log('Row data:', obj); // 各行のデータを確認
-
                 return obj;
-            });
+            }).filter(row => row);
 
             places = data.map(place => ({
                 name: place['名前'],
@@ -38,10 +36,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }));
 
             console.log('Places loaded:', places);
+
+            // 初期化時に進むボタンを表示
             document.getElementById('proceedButton').style.display = 'block';
         })
         .catch(error => console.error('Error loading CSV file:', error));
 });
+
+// カンマを含むCSV行を正しく分割するための関数
+function parseCSVRow(row) {
+    const regex = /,(?=(?:[^"]*"[^"]*")*[^"]*$)/g;
+    return row.split(regex).map(field => field.trim());
+}
+
 
 
 function startApp() {
