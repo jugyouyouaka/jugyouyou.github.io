@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const headers = rows[0].split(',');
 
             console.log('Headers:', headers); // ヘッダーを確認
+            console.log('CSV Data:', text); // データ全体を表示
 
             const data = rows.slice(1).map(row => {
                 const values = row.split(',');
