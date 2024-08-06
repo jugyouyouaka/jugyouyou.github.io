@@ -12,20 +12,34 @@ let userTravelTime; // ユーザーが入力した所要時間
 let avoidTolls; // ユーザーの有料道路の有無
 
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('/places')
-        .then(response => response.json())
-        .then(data => {
-            places = data.map(place => ({
-                name: place.name,
-                suit: place.suit,
-                address: place.address
+    fetch('/places.csv')
+        .then(response => response.text())
+        .then(text => {
+            const rows = text.split('\n');
+            const headers = rows[0].split(',');
+
+            const data = rows.slice(1).map(row => {
+                const values = row.split(',');
+                let obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = values[index];
+                });
+                return obj;
+            });
+
+            const places = data.map(place => ({
+                name: place['名前'],
+                suit: place['ジャンル'],
+                address: place['住所']
             }));
+
             console.log('Places loaded:', places);
 
             // 初期化時に進むボタンを表示
             document.getElementById('proceedButton').style.display = 'block';
         });
 });
+
 
 function startApp() {
     document.getElementById('titleScreen').style.display = 'none';
