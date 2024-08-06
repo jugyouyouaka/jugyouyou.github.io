@@ -15,9 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/places')
         .then(response => response.json())
         .then(data => {
-            places = data;
+            const places = data;
             console.log('Places loaded:', places);
+        })
+        .catch(error => {
+            console.error('Error loading places:', error);
         });
+});
+
 
     // 初期化時に進むボタンを表示
     document.getElementById('proceedButton').style.display = 'block';
