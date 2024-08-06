@@ -10,7 +10,7 @@
     <pre id="csv-output"></pre>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('data/places.csv')
+            fetch('places.csv')
                 .then(response => response.text())
                 .then(text => {
                     const rows = text.split('\n');
