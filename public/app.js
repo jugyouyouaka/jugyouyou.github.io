@@ -15,12 +15,16 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/places')
         .then(response => response.json())
         .then(data => {
-            places = data;
+            places = data.map(place => ({
+                name: place.name,
+                suit: place.suit,
+                address: place.address
+            }));
             console.log('Places loaded:', places);
-        });
 
-    // 初期化時に進むボタンを表示
-    document.getElementById('proceedButton').style.display = 'block';
+            // 初期化時に進むボタンを表示
+            document.getElementById('proceedButton').style.display = 'block';
+        });
 });
 
 function startApp() {
