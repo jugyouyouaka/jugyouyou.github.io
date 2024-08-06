@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/places.csv')
         .then(response => response.text())
         .then(text => {
-            const rows = text.trim().split('\n'); // .trim()で余分な空白行を削除
+            const rows = text.trim().split('\n');
             const headers = rows[0].split(',');
 
             const data = rows.slice(1).map(row => {
-                const values = row.split(',');
+                const values = row.split(',').map(value => value.trim());
                 let obj = {};
                 headers.forEach((header, index) => {
                     obj[header] = values[index];
@@ -40,9 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error loading CSV file:', error));
 });
-
-
-
 
 function startApp() {
     document.getElementById('titleScreen').style.display = 'none';
