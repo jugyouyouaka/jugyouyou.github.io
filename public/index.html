@@ -58,22 +58,30 @@
             font-size: 24px;
             margin: 20px 0; /* 上下に大きなマージンを追加 */
         }
+        #inputScreen {
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            position: absolute; /* 絶対配置に変更 */
+            top: 10%; /* 画面の上部に近づける */
+            transform: translateY(-10%); /* 垂直に上に移動 */
+        }
         #inputScreen h2 {
-            margin-top: 30px; /* タイトルの上に大きなスペースを追加 */
+            margin-top: 0; /* タイトルの上のスペースを削除 */
         }
         label, input, span {
             display: block;
-            margin: 20px 0; /* 要素間のマージンを増やす */
+            margin: 15px 0; /* 要素間のマージンを調整 */
             font-size: 18px; /* フォントサイズを大きく */
         }
         #inputScreen label {
             display: flex;
             align-items: center;
-            margin: 20px 0; /* ラベルの上下に大きなスペースを追加 */
+            margin: 15px 0; /* ラベルの上下にマージンを追加 */
         }
         #inputScreen #timeRange {
             width: 90%; /* スライダーの幅を広げる */
-            margin: 20px auto; /* 上下に大きなスペースを追加 */
+            margin: 15px auto; /* 上下に大きなスペースを追加 */
             -webkit-appearance: none; /* デフォルトのスタイルをリセット */
             height: 8px; /* スライダーの高さを設定 */
             background: #ddd; /* スライダーの背景色 */
@@ -97,7 +105,7 @@
         #inputScreen .checkbox-wrapper {
             display: flex;
             align-items: center;
-            margin-top: 30px; /* チェックボックスとラベルの間に大きなスペースを追加 */
+            margin-top: 15px; /* チェックボックスとラベルの間にスペースを追加 */
         }
         #inputScreen #tollRoads {
             transform: scale(1.5); /* チェックボックスを1.5倍に拡大 */
