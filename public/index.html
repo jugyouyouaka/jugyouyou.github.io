@@ -15,6 +15,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            background-color: #f4f4f4; /* 背景色を設定 */
         }
         #map, #results, #suitScreen, #inputScreen {
             display: none;
@@ -23,6 +24,9 @@
             text-align: center;
             margin: 0;
             padding: 20px;
+            position: absolute; /* 絶対配置に変更 */
+            top: 25%; /* 画面の中央より少し上に配置 */
+            transform: translateY(-25%); /* 垂直に中央から少し上に移動 */
         }
         #map {
             height: 300px; /* スマホの画面サイズに合わせた高さ */
@@ -54,6 +58,9 @@
             font-size: 24px;
             margin: 10px 0;
         }
+        #inputScreen h2 {
+            margin-top: 20px; /* タイトルの上にスペースを追加 */
+        }
         label, input, span {
             display: block;
             margin: 10px;
@@ -82,6 +89,9 @@
             border-radius: 50%; /* サムを丸くする */
             cursor: pointer; /* サムをクリック可能にする */
         }
+        #inputScreen label, #inputScreen input {
+            margin-top: 20px; /* ラベルと入力の間にスペースを追加 */
+        }
         #placeList, #history {
             padding: 0;
             list-style: none;
@@ -106,7 +116,7 @@
 <body>
     <div id="titleScreen">
         <img src="logo.png" alt="Logo">
-        <h1></h1>
+        <h1>Google Maps Address Plot</h1>
         <button onclick="startApp()">始める</button>
     </div>
 
