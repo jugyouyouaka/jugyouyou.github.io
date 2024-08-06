@@ -24,13 +24,15 @@
             text-align: center;
             margin: 0;
             padding: 20px;
-            position: absolute; /* 絶対配置に変更 */
-            top: 20%; /* 画面の中央より少し上に配置 */
-            transform: translateY(-20%); /* 垂直に中央から少し上に移動 */
+            position: absolute;
+            top: 20%;
+            transform: translateY(-20%);
         }
         #map {
+            width: 100%; /* 幅を100%に設定 */
             height: 300px; /* スマホの画面サイズに合わせた高さ */
-            width: 100%;
+            max-width: 600px; /* 最大幅を設定 */
+            max-height: 400px; /* 最大高さを設定 */
         }
         #titleScreen img {
             width: 90%; /* ロゴ画像を調整 */
@@ -62,13 +64,13 @@
             text-align: center;
             margin: 0;
             padding: 20px;
-            position: absolute; /* 絶対配置に変更 */
-            top: 10%; /* 画面の上部に近づける */
-            transform: translateY(-10%); /* 垂直に上に移動 */
+            position: absolute;
+            top: 10%;
+            transform: translateY(-10%);
         }
         #inputScreen h2 {
-            margin-top: 0; /* タイトルの上のスペースを削除 */
-            margin-bottom: 20px; /* タイトルの下のスペースを追加 */
+            margin-top: 0;
+            margin-bottom: 20px;
         }
         label {
             display: block;
@@ -78,58 +80,58 @@
         #inputScreen #timeRange {
             width: 70%; /* スライダーの幅を調整 */
             margin: 15px auto; /* 上下に大きなスペースを追加 */
-            -webkit-appearance: none; /* デフォルトのスタイルをリセット */
-            height: 8px; /* スライダーの高さを設定 */
-            background: #ddd; /* スライダーの背景色 */
-            border-radius: 5px; /* スライダーの角を丸くする */
+            -webkit-appearance: none;
+            height: 8px;
+            background: #ddd;
+            border-radius: 5px;
         }
         #inputScreen #timeRange::-webkit-slider-thumb {
-            -webkit-appearance: none; /* デフォルトのスタイルをリセット */
-            width: 25px; /* サムの幅 */
-            height: 25px; /* サムの高さ */
-            background: #007bff; /* サムの背景色 */
-            border-radius: 50%; /* サムを丸くする */
-            cursor: pointer; /* サムをクリック可能にする */
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
         }
         #inputScreen #timeRange::-moz-range-thumb {
-            width: 25px; /* サムの幅 */
-            height: 25px; /* サムの高さ */
-            background: #007bff; /* サムの背景色 */
-            border-radius: 50%; /* サムを丸くする */
-            cursor: pointer; /* サムをクリック可能にする */
+            width: 25px;
+            height: 25px;
+            background: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
         }
         #inputScreen #timeDisplay {
             display: inline-block;
-            font-size: 18px; /* フォントサイズを大きく */
-            margin-left: 15px; /* ラベルと値の間にスペースを追加 */
+            font-size: 18px;
+            margin-left: 15px;
         }
         #inputScreen .checkbox-wrapper {
             display: flex;
             align-items: center;
-            justify-content: center; /* チェックボックスを中央揃え */
-            margin-top: 15px; /* チェックボックスとラベルの間にスペースを追加 */
+            justify-content: center;
+            margin-top: 15px;
         }
         #inputScreen #tollRoads {
-            transform: scale(1.5); /* チェックボックスを1.5倍に拡大 */
-            margin-left: 10px; /* チェックボックスとラベルの間隔を追加 */
+            transform: scale(1.5);
+            margin-left: 10px;
         }
         #inputScreen .checkbox-wrapper label {
-            margin-right: 10px; /* チェックボックスとラベルの間隔を追加 */
+            margin-right: 10px;
         }
         #inputScreen .checkbox-wrapper input[type="checkbox"] {
-            margin-left: 5px; /* チェックボックスの左にスペースを追加 */
+            margin-left: 5px;
         }
         #inputScreen .checkbox-wrapper {
-            margin-top: 30px; /* チェックボックスと他の要素の間隔を追加 */
+            margin-top: 30px;
         }
         #placeList, #history {
             padding: 0;
             list-style: none;
-            font-size: 16px; /* フォントサイズを調整 */
-            margin: 20px; /* リストの上下に大きなマージンを追加 */
+            font-size: 16px;
+            margin: 20px;
         }
         #placeList li, #history li {
-            margin-bottom: 15px; /* リストアイテム間のマージンを増やす */
+            margin-bottom: 15px;
         }
 
         /* デスクトップ向けのスタイル調整 */
@@ -154,7 +156,7 @@
         <h2>所要時間と有料道路の選択</h2>
         <label for="timeRange">
             所要時間（分）:
-            <span id="timeDisplay">60分</span> <!-- 所要時間の値をラベルの隣に配置 -->
+            <span id="timeDisplay">60分</span>
         </label>
         <input type="range" id="timeRange" min="0" max="120" step="10" value="60" oninput="updateTimeDisplay()">
         <div class="checkbox-wrapper">
@@ -170,7 +172,7 @@
     <div id="results">
         <h2>円内の場所</h2>
         <ul id="placeList"></ul>
-        <div id="history"></div> <!-- 履歴表示用の要素 -->
+        <div id="history"></div>
         <button onclick="goBackToMap()">地図に戻る</button>
         <button onclick="redirectToHiLo()">次へ</button>
     </div>
