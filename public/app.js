@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/places.csv')
         .then(response => response.text())
         .then(text => {
-            const rows = text.split('\n');
+            const rows = text.trim().split('\n'); // .trim()で余分な空白行を削除
             const headers = rows[0].split(',');
 
             const data = rows.slice(1).map(row => {
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return obj;
             });
 
-            const places = data.map(place => ({
+            places = data.map(place => ({
                 name: place['名前'],
                 suit: place['ジャンル'],
                 address: place['住所']
@@ -37,8 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 初期化時に進むボタンを表示
             document.getElementById('proceedButton').style.display = 'block';
-        });
+        })
+        .catch(error => console.error('Error loading CSV file:', error));
 });
+
 
 
 function startApp() {
