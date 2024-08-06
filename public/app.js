@@ -49,8 +49,6 @@ function parseCSVRow(row) {
     return row.split(regex).map(field => field.trim());
 }
 
-
-
 function startApp() {
     document.getElementById('titleScreen').style.display = 'none';
     document.getElementById('inputScreen').style.display = 'block';
@@ -201,7 +199,12 @@ function showPlacesWithinRadius() {
     // `userTravelTime`、`placesWithinRadius`、`travelTimeHistory`をlocalStorageに保存
     localStorage.setItem('userTravelTime', JSON.stringify(userTravelTime));
     localStorage.setItem('placesWithinRadius', JSON.stringify(placesWithinRadius));
+    
+    // 現在地を確定ボタンを非表示にする
+    document.getElementById('confirmLocation').style.display = 'none';
 }
+
+
 
 function calculateTravelTime(origin, destination, listItem) {
     const service = new google.maps.DirectionsService();
@@ -268,3 +271,4 @@ function redirectToHiLo() {
     window.location.href = 'HiLo.html'; // HiLo.htmlへのリダイレクト
     localStorage.setItem('travelTimeHistory', JSON.stringify(travelTimeHistory));
 }
+
