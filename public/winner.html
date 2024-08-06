@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Winner Screen</title>
+    <style>
+        #suitScreen {
+            display: block;
+            text-align: center;
+        }
+        .cardButton {
+            border: none;
+            background: none;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        .cardImage {
+            width: 100px;
+            height: 150px;
+        }
+        .cardButton:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="suitScreen">
+        <h2>絵柄を選んでください</h2>
+        <button class="cardButton" data-suit="スペード"><img src="spade.png" alt="スペード" class="cardImage"></button>
+        <button class="cardButton" data-suit="ハート"><img src="heart.png" alt="ハート" class="cardImage"></button>
+        <button class="cardButton" data-suit="ダイヤ"><img src="diamond.png" alt="ダイヤ" class="cardImage"></button>
+        <button class="cardButton" data-suit="クローバー"><img src="club.png" alt="クローバー" class="cardImage"></button>
+        <button class="cardButton" data-suit="ジョーカー"><img src="joker.png" alt="ジョーカー" class="cardImage"></button>
+        <div id="selectedPlace"></div>
+    </div>
+
+    <script src="winner.js"></script>
+</body>
+</html>

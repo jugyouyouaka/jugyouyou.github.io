@@ -1,0 +1,70 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Maps Address Plot with Travel Radius</title>
+    <style>
+        #map, #results, #suitScreen, #inputScreen {
+            display: none;
+        }
+        #titleScreen {
+            display: block;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        #suitScreen {
+            margin-top: 20px;
+        }
+        #titleScreen img {
+            width: 300px; /* Adjust the size as needed */
+        }
+    </style>
+</head>
+<body>
+    <div id="titleScreen">
+        <img src="logo.png" alt="Logo">
+        <h1></h1>
+        <button onclick="startApp()">始める</button>
+    </div>
+
+    <div id="inputScreen">
+        <h2>所要時間と有料道路の選択</h2>
+        <label for="timeRange">所要時間（分）:</label>
+        <input type="range" id="timeRange" min="0" max="120" step="10" value="60" onchange="updateTimeDisplay()">
+        <span id="timeDisplay">60分</span>
+        <br>
+        <label for="tollRoads">有料道路を使用する:</label>
+        <input type="checkbox" id="tollRoads">
+        <br>
+        <button id="proceedButton" onclick="proceedToMap()" style="display: none;">次へ</button>
+    </div>
+
+    <div id="map"></div>
+    <button id="confirmLocation" style="display:none;" onclick="confirmLocation()">現在地を確定</button>
+
+    <div id="results">
+        <h2>円内の場所</h2>
+        <ul id="placeList"></ul>
+        <div id="history"></div> <!-- 履歴表示用の要素 -->
+        <button onclick="goBackToMap()">地図に戻る</button>
+        <!-- <button id="nextScreenButton" onclick="nextScreen('suitScreen')">次へ</button> -->
+        <button onclick="redirectToHiLo()">次へ</button> 追加するボタン
+    </div>
+    
+    <div id="suitScreen" class="hidden">
+        <h2>絵柄を選んでください</h2>
+        <div id="selectedPlace"></div>
+    </div>
+
+    <!-- Google Maps API -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJw4noENWRPZcLapoJ1VN-UQ45LJQI90Y&callback=initMap">
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

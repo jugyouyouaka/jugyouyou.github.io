@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>カード選択</title>
+    <style>
+        #cardButtons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .cardImage {
+            width: 100px;  /* カードの幅 */
+            height: 150px; /* カードの高さ */
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .cardImage:hover {
+            transform: scale(1.1);
+        }
+        #selectedPlace {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="loserScreen">
+        <h2>カードを選んでください</h2>
+        <div id="cardButtons"></div>
+        <div id="selectedPlace"></div>
+    </div>
+
+    <script src="loser.js"></script>
+</body>
+</html>

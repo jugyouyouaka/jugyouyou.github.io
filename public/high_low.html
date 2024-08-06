@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High & Low Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-image: url('images/dealer.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    #result {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    #cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    #dealerCard, #playerCard {
+      text-align: center;
+    }
+
+    #dealerCard img, #playerCard img {
+      width: 120px;
+      height: auto;
+    }
+
+    #resultMessage {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #guess {
+      margin-top: 20px;
+    }
+
+    /* ボタンが初めは表示されるようにする */
+    #guess button {
+      display: inline-block;
+    }
+
+    /* ボタンが非表示になる場合のスタイル */
+    #guess button.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="resultMessage"></div>
+  <div id="result">
+    <span id="dealerCard"><img src="cards/back.png" alt="dealer's card"></span>
+  </div>
+  <div id="cards">
+    <div id="playerCard"><img src="cards/1s.png" alt="player's card"></div>
+  </div>
+  <div id="guess">
+    <button id="guessHigher" onclick="guessHigher()">Higher</button>
+    <button id="guessSame" onclick="guessSame()">Same</button>
+    <button id="guessLower" onclick="guessLower()">Lower</button>
+  </div>
+  <div id="nextCard"></div>
+
+  <script>
+    const suits = ['s', 'h', 'd', 'c'];
+    const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+
+    function getRandomCard() {
+      const value = values[Math.floor(Math.random() * values.length)];
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+      return { value, suit };
+    }
+
+    // ディーラーとプレイヤーのカードを初期化
+    let dealerCard = getRandomCard();
+    let playerCard = getRandomCard();
+
+    document.getElementById('playerCard').innerHTML = `<img src="cards/${playerCard.value}${playerCard.suit}.png" alt="player's card">`;
+
+    function guessHigher() {
+      checkGuess('higher');
+    }
+
+    function guessSame() {
+      checkGuess('same');
+    }
+
+    function guessLower() {
+      checkGuess('lower');
+    }
+
+    function checkGuess(guess) {
+      let resultText = '';
+      let correct = false;
+      if (guess === 'same') {
+        if (playerCard.value === dealerCard.value) {
+          resultText = 'Correct!';
+          correct = true;
+        } else {
+          resultText = 'Wrong!';
+        }
+      } else if ((guess === 'higher' && playerCard.value > dealerCard.value) ||
+                (guess === 'lower' && playerCard.value < dealerCard.value)) {
+        resultText = 'Correct!';
+        correct = true;
+      } else {
+        resultText = 'Wrong!';
+      }
+
+      document.getElementById('resultMessage').innerText = `Result: ${resultText}`;
+      document.getElementById('result').innerHTML = `<img src="cards/${dealerCard.value}${dealerCard.suit}.png" alt="dealer's card" style="width: 120px; height: auto;">`;
+
+      // ゲーム終了後にボタンを非表示にする
+      document.getElementById('guess').style.display = 'none';
+
+      // 正解の場合は winner.html にリダイレクト、間違いの場合は loser.html にリダイレクト
+      if (correct) {
+        setTimeout(() => {
+          window.location.href = 'winner.html';
+        }, 2000); // 2秒後にリダイレクト
+      } else {
+        setTimeout(() => {
+          window.location.href = 'loser.html';
+        }, 2000); // 2秒後にリダイレクト
+      }
+    }
+  </script>
+</body>
+</html>
