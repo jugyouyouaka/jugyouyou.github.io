@@ -1,142 +1,146 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Content-Style-Type" content="text/css">
-    <meta http-equiv="Content-Script-Type" content="text/javascript">
-    <title>Spoken Dialog by Javascript</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #resultOutput { margin-top: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spoken Dialog with Timetable</title>
 </head>
 <body>
 
-<h1>認識結果に対応するウェブページを表示してみよう</h1>
+<h1>複数のキーワード（順序入れ替え可）</h1>
 
 <p>
-    <button id="startButton">start</button>
-    <button id="stopButton">stop</button>
+<button id="startButton">start</button>
+<button id="stopButton">stop</button>
 </p>
 
+<p>
 <div id="resultOutput"></div>
+</p>
+
+<div id="timetable"></div> <!-- 時間割を表示する場所 -->
 
 <script>
-// 応答の定義（ハッシュ）    
+// CSVファイルのパス
+const csvFilePath = 'timetable.csv';
+
+// 応答の定義（ハッシュ）
 var response = {
-    "課題やる": ["頑張れよ", "https://moodle2024.wakayama-u.ac.jp/2024/my/", "https://www.notion.so/"],
-    "先生 お願いします": ["任せろ", "https://chatgpt.com/", "https://www.deepl.com/ja/translator", "https://gemini.google.com/app?hl=ja"],
-    "今日の時間割は": ["今日の時間割は、", ""], // 空の文字列を初期化
-    "奈良の天気": ["奈良県の天気予報を表示します", "https://weather.yahoo.co.jp/weather/jp/29/"],
-    "兵庫の天気": ["兵庫県の天気予報を表示します", "https://weather.yahoo.co.jp/weather/jp/28/"]
+    "あなた,誰": ["私はあなたのお友達です。たぶん"],
+    "名前は": ["私は名もなき新米ボイスアシスタントです。名前はまだない"],
+    "何歳": ["私はあなたに呼ばれた度に生まれます。つまり生まれたて"],
+    "元気": ["おそらく元気"],
+    "好きな,食べ物": ["新鮮な情報体は美味です。人間が食べるオサシミ…？はこのような味がするのでしょうか"],
+    "課題,やる": ["頑張ってくださいね", "https://moodle2024.wakayama-u.ac.jp/2024/my/", "https://www.notion.so/"],
+    "教えて,先生": ["私はまだ新米なので教えられませんが、代わりに知り合いを数人紹介しましょう", "https://chatgpt.com/", "https://www.deepl.com/ja/translator", "https://gemini.google.com/app?hl=ja"],
+    "今日,時間割": [""]
 };
 
-const startButton = document.querySelector('#startButton'); // 開始ボタン
-const stopButton = document.querySelector('#stopButton'); // 停止ボタン
-const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
+// 開始ボタンと停止ボタンの取得
+const startButton = document.querySelector('#startButton');
+const stopButton = document.querySelector('#stopButton');
+const resultOutput = document.querySelector('#resultOutput');
+const timetableDiv = document.querySelector('#timetable'); // 時間割表示用
 
-if (!('SpeechSynthesisUtterance' in window)) {
+if (!'SpeechSynthesisUtterance' in window) {
     alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
 }
-
-const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
-tts.lang = "ja-JP"; // 言語(日本語)
-tts.rate = 1.0; // 速度
-tts.pitch = 1.0; // 声の高さ
-tts.volume = 1.0; // 音量
+const tts = new SpeechSynthesisUtterance();
+tts.lang = "ja-JP";
+tts.rate = 2.0;
+tts.pitch = 10.0;
+tts.volume = 1.0;
 
 SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-if (!('SpeechRecognition' in window)) {
+if (!'SpeechRecognition' in window) {
     alert("あなたのブラウザはSpeech Recognition APIに未対応です。");
 }
 
-const asr = new SpeechRecognition(); // ASRインスタンスを生成
-asr.lang = "ja-JP"; // 言語（日本語）
-asr.interimResults = true; // 途中結果出力をオン
-asr.continuous = true; // 継続入力をオン
+const asr = new SpeechRecognition();
+asr.lang = "ja-JP";
+asr.interimResults = true;
+asr.continuous = true;
 
-let output = ''; // 出力
+let output = '';
 
-// CSVまたはTXTファイルを読み込む関数
-function loadScheduleFile(file, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.overrideMimeType("application/json");
-    xhr.open("GET", file, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            callback(xhr.responseText);
+// CSVファイルを読み込んでパースする関数
+function parseCSV(csvData) {
+    const lines = csvData.split("\n");
+    const result = [];
+    const headers = lines[0].split(",");
+    
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentline = lines[i].split(",");
+        
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j]] = currentline[j];
         }
-    };
-    xhr.send(null);
+        
+        result.push(obj);
+    }
+    
+    return result;
 }
 
-// 今日の曜日を取得し、対応する時間割を返す関数
-function getScheduleForToday(scheduleData) {
-    const days = ["日", "月", "火", "水", "木", "金", "土"];
-    const today = new Date().getDay();
-    const todayKanji = days[today];
-
-    const lines = scheduleData.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        const fields = lines[i].split(',');
-        if (fields[0] === todayKanji) {
-            return fields.slice(1).join('、'); // 時間割の要素を結合
-        }
+// 曜日から対応する時間割を取得し、表として表示する関数
+function displayTimetableForToday(timetable) {
+    const now = new Date();
+    const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
+    const today = daysOfWeek[now.getDay()];
+    
+    const todayTimetable = timetable.find(row => row["曜日"] === today);
+    
+    if (todayTimetable) {
+        let tableHTML = "<table border='1'><tr><th>時限</th><th>科目</th></tr>";
+        Object.keys(todayTimetable).forEach((key, index) => {
+            if (key !== "曜日") {
+                tableHTML += `<tr><td>${key}</td><td>${todayTimetable[key]}</td></tr>`;
+            }
+        });
+        tableHTML += "</table>";
+        timetableDiv.innerHTML = tableHTML;
+    } else {
+        timetableDiv.innerHTML = "今日は時間割がありません。";
     }
-    return "時間割が見つかりませんでした"; // 見つからない場合のメッセージ
 }
 
 // 認識結果が出力されたときのイベントハンドラ
-asr.onresult = function(event) {
-    let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
+asr.onresult = function(event){
+    let transcript = event.results[event.resultIndex][0].transcript;
 
-    let output_not_final = '';
-    if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
-        asr.abort(); // 音声認識を停止
-        let ret = response[transcript];
-
-        if (transcript === "今日の時間割は？") {
-            loadScheduleFile('schedule.csv', function(data) {
-                const schedule = getScheduleForToday(data);
-                response["今日の時間割は？"][1] = schedule; // 時間割を設定
-                tts.text = response["今日の時間割は？"][0] + schedule; // 読み上げるテキストを設定
-                output += transcript + ' => ' + tts.text + '<br>';
-                resultOutput.innerHTML = output;
-
-                tts.onend = function(event) {
-                    asr.start(); // 音声認識を再開
-                }
-                speechSynthesis.speak(tts); // 再生
+    if (event.results[event.resultIndex].isFinal) {
+        asr.abort();
+        
+        let answer;
+        let keys = Object.keys(response);
+        keys.forEach(function(key) {
+            let flag = true;
+            key.split(',').forEach(function(word) {              
+                let pattern = new RegExp(word);
+                flag = flag && pattern.test(transcript);
             });
-        } else {
-            let answer;
-            let webpages = [];
 
-            if (typeof ret === 'undefined') {
-                answer = "ごめんなさい。わかりません。";
-            } else {
-                answer = ret[0];
-                webpages = ret.slice(1); // 配列の2番目以降の要素をすべて取得
+            if(flag){
+                answer = response[key];
+                if (key === "今日,時間割") {
+                    fetch(csvFilePath)
+                        .then(response => response.text())
+                        .then(csvData => {
+                            const timetable = parseCSV(csvData);
+                            displayTimetableForToday(timetable);
+                        });
+                }
             }
+        });
 
-            output += transcript + ' => ' + answer + '<br>';
-            tts.text = answer;
-
-            // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
-            tts.onend = function(event) {
-                webpages.forEach(function(page) {
-                    window.open(page, '_blank'); // 新しいタブでページを開く
-                });
-                asr.start(); // 音声認識を再開 
-            }
-
-            speechSynthesis.speak(tts); // 再生
+        if(typeof answer == 'undefined'){
+            answer = "わかりません。でももっと賢くなります";
         }
-    } else { // 結果がまだ未確定のとき
-        output_not_final = '<span style="color:#ddd;">' + transcript + '</span>';
+
+        tts.text = answer;
+        speechSynthesis.speak(tts);
     }
-    resultOutput.innerHTML = output + output_not_final;
 }
 
 // 開始ボタンのイベントハンドラ
