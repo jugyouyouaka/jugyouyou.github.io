@@ -106,14 +106,18 @@ function getCurrentTime() {
     let minutes = now.getMinutes();
     return hours + "時" + minutes + "分";
 }
+// 再生が終了したときに音声認識を再開するかどうかを制御するフラグ
+let shouldRestartRecognition = true;
+
 // 認識結果が出力されたときのイベントハンドラ
 asr.onresult = function(event){
     let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
 
     let output_not_final = '';
     if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
-	    asr.abort(); // 音声認識を停止
-	    
+        asr.abort(); // 音声認識を停止
+        shouldRestartRecognition = false; // 一時的に再開を防ぐ
+        
         let answer;
         
         let keys = Object.keys(response);
@@ -126,7 +130,7 @@ asr.onresult = function(event){
             });
 
             if(flag){
-		        answer = response[key];
+                answer = response[key];
                 if(key === "今,何時"){
                     // 現在の時刻を取得して応答にセット
                     let currentTime = getCurrentTime();
@@ -151,19 +155,22 @@ asr.onresult = function(event){
         });
 
         if(typeof answer == 'undefined'){
-	        answer = "わかりません。でももっと賢くなります";
-    	}
+            answer = "わかりません。でももっと賢くなります";
+        }
 
         output += transcript + ' => ' + answer + '<br>';
 
         tts.text = answer;
-	
-	    // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
-	    tts.onend = function(event){
-	        asr.start(); // 音声認識を再開
-	    }
+    
+        // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
+        tts.onend = function(event){
+            if (shouldRestartRecognition) {
+                asr.start(); // 音声認識を再開
+            }
+        }
 
-	    speechSynthesis.speak(tts); // 再生
+        speechSynthesis.speak(tts); // 再生
+        shouldRestartRecognition = true; // 再開を許可
     } else { // 結果がまだ未確定のとき
         output_not_final = '<span style="color:#ddd;">' + transcript + '</span>';
     }
@@ -172,11 +179,13 @@ asr.onresult = function(event){
 
 // 開始ボタンのイベントハンドラ
 startButton.addEventListener('click', function() {
+    shouldRestartRecognition = true; // 再開を許可
     asr.start();
 })
 
 // 停止ボタンのイベントハンドラ
 stopButton.addEventListener('click', function() {
+    shouldRestartRecognition = false; // 再開を防ぐ
     asr.abort();
     asr.stop();
 })
