@@ -107,35 +107,32 @@ function getCurrentTime() {
 }
 
 // 認識結果が出力されたときのイベントハンドラ
-asr.onresult = function(event){
+asr.onresult = function(event) {
     let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
 
     let output_not_final = '';
     if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
-	    asr.abort(); // 音声認識を停止
-	    
-        let answer;
+        asr.abort(); // 音声認識を停止
         
+        let answer;
+
         let keys = Object.keys(response);
         keys.forEach(function(key) {
             let flag = true;
-            console.log(transcript);
             key.split(',').forEach(function(word) {              
                 let pattern = new RegExp(word);
                 let flag_test = pattern.test(transcript); // マッチしたらtrue, しなかったらfalse
                 flag = flag && flag_test; // 両方trueならtrue
-                console.log(pattern + '+' + ':' + flag_test);
             });
 
-            if(flag){
-		        answer = response[key];
-                if(key === "今,何時"){
-                    // 現在の時刻を取得して応答にセット
-                    let currentTime = getCurrentTime();
-                    answer = ["現在の時刻は " + currentTime + " です。"];
-                }
-
+            if(flag) {
+                answer = response[key];
                 console.log(key + " : " + answer);
+
+                // 配列かどうかをチェックし、配列でない場合は配列に変換
+                if (!Array.isArray(answer)) {
+                    answer = [answer];
+                }
 
                 // リンクが含まれている場合、3秒後にそのリンクを新しいタブで開く
                 answer.forEach(function(ans) {
@@ -152,20 +149,23 @@ asr.onresult = function(event){
         });
 
         if(typeof answer == 'undefined'){
-	        answer = "わかりません。でももっと賢くなります";
-    	}
-	
-	    // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
-	    tts.onend = function(event){
-	        asr.start(); // 音声認識を再開
-	    }
+            answer = "わかりません。でももっと賢くなります";
+            output += transcript + ' => ' + answer + '<br>';
+            tts.text = answer;
+        }
+    
+        // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
+        tts.onend = function(event){
+            asr.start(); // 音声認識を再開
+        }
 
-	    speechSynthesis.speak(tts); // 再生
+        speechSynthesis.speak(tts); // 再生
     } else { // 結果がまだ未確定のとき
         output_not_final = '<span style="color:#ddd;">' + transcript + '</span>';
     }
     resultOutput.innerHTML = output + output_not_final;
 }
+
 
 // 開始ボタンのイベントハンドラ
 startButton.addEventListener('click', function() {
