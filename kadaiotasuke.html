@@ -29,9 +29,48 @@ var response = {
     "好きな,食べ物": ["新鮮な情報体は美味です。人間が食べるオサシミ…？はこのような味がするのでしょうか"],
     "課題,やる": ["頑張ってくださいね", "https://moodle2024.wakayama-u.ac.jp/2024/my/", "https://www.notion.so/"],
     "教えて,先生": ["私はまだ新米なので教えられませんが、代わりに知り合いを数人紹介しましょう", "https://chatgpt.com/", "https://www.deepl.com/ja/translator", "https://gemini.google.com/app?hl=ja"],
-    "今日,時間割": ["今日は 曜日ですから、 です"],
-    "教育サポート": ["これのことですか？", "https://kmags.wakayama-u.ac.jp/campusweb/campusportal.do?page=main"],
-    "今,何時": [""] // 時間を動的にセットするための空の配列
+    "教育サポート": ["これのことですか？", "https://kmags.wakayama-u.ac.jp/campusweb/campusportal.do?page=main"]
+};
+
+// CSVのロードと時間割の表示
+function loadCSV(url, callback) {
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            const lines = data.split("\n");
+            const result = {};
+
+            // 1行目は曜日のヘッダー
+            const headers = lines[0].split(",");
+
+            for (let i = 1; i < lines.length; i++) {
+                const row = lines[i].split(",");
+                for (let j = 0; j < headers.length; j++) {
+                    if (!result[headers[j]]) {
+                        result[headers[j]] = [];
+                    }
+                    result[headers[j]].push(row[j]);
+                }
+            }
+
+            callback(result);
+        });
+}
+
+function getCurrentDayTimetable(timetable) {
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+    const today = new Date().getDay(); // 0:日曜日, 1:月曜日, ..., 6:土曜日
+    const currentDay = days[today];
+    
+    return timetable[currentDay] || ["時間割が見つかりませんでした"];
+}
+
+response["今日,時間割"] = function() {
+    loadCSV("timetable.csv", function(timetable) {
+        const dayTimetable = getCurrentDayTimetable(timetable);
+        tts.text = dayTimetable.join(", ");
+        speechSynthesis.speak(tts);
+    });
 };
 
 const startButton = document.querySelector('#startButton'); // 開始ボタン
