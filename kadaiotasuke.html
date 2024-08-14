@@ -1,30 +1,45 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Content-Style-Type" content="text/css">
-<meta http-equiv="Content-Script-Type" content="text/javascript">
-<title>Spoken Dialog by Javascript</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <title>Spoken Dialog by Javascript</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #startButton::before {
+            content: '🎤 '; /* Microphone icon */
+        }
+        #stopButton::before {
+            content: '🛑 '; /* Stop icon */
+        }
+    </style>
 </head>
 <body>
-
-<h1>複数のキーワード（順序入れ替え可）</h1>
+<h1>課題やるときに使うようなやつ</h1>
 
 <p>
-<button id="startButton">start</button>
-<button id="stopButton">stop</button>
+    <button id="startButton">start</button>
+    <button id="stopButton">stop</button>
 </p>
 
 <p>
-<div id="resultOutput"></div>
+    <div id="resultOutput"></div>
 </p>
 
 <script>
-
-    // CSVファイルのパス
-const csvFilePath = 'timetable.csv';
-
-// 応答の定義（ハッシュ）    
 var response = {
     "あなた,誰": ["私はあなたのお友達です。たぶん"],
     "名前は": ["私は名もなき新米ボイスアシスタントです。名前はまだない"],
@@ -33,133 +48,102 @@ var response = {
     "好きな,食べ物": ["新鮮な情報体は美味です。人間が食べるオサシミ…？はこのような味がするのでしょうか"],
     "課題,やる": ["頑張ってくださいね", "https://moodle2024.wakayama-u.ac.jp/2024/my/", "https://www.notion.so/"],
     "教えて,先生": ["私はまだ新米なので教えられませんが、代わりに知り合いを数人紹介しましょう", "https://chatgpt.com/", "https://www.deepl.com/ja/translator", "https://gemini.google.com/app?hl=ja"],
-    "今日,時間割": [""],
     "教育サポート": ["これのことですか？", "https://kmags.wakayama-u.ac.jp/campusweb/campusportal.do?page=main"],
     "今,何時": [""] // 時間を動的にセットするための空の配列
 };
 
-const startButton = document.querySelector('#startButton'); // 開始ボタン
-const stopButton = document.querySelector('#stopButton'); // 停止ボタン
-const resultOutput = document.querySelector('#resultOutput'); // 結果出力エリア
-const timetableDiv = document.querySelector('#timetable'); // 時間割表示用
-
+const startButton = document.querySelector('#startButton');
+const stopButton = document.querySelector('#stopButton');
+const resultOutput = document.querySelector('#resultOutput');
 
 if (!'SpeechSynthesisUtterance' in window) {
     alert("あなたのブラウザはSpeech Synthesis APIに未対応です。");
 }
-const tts = new SpeechSynthesisUtterance(); // TTSインスタンスを生成
-tts.lang = "ja-JP"; // 言語(日本語)、英語の場合はen-US
-tts.rate = 2.0; // 速度
-tts.pitch = 10.0; // 声の高さ
-tts.volume = 1.0; // 音量
+const tts = new SpeechSynthesisUtterance();
+tts.lang = "ja-JP";
+tts.rate = 2.0;
+tts.pitch = 10.0;
+tts.volume = 1.0;
 
 SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
 if (!'SpeechRecognition' in window) {
     alert("あなたのブラウザはSpeech Recognition APIに未対応です。");
 }
 
-const asr = new SpeechRecognition(); // ASRインスタンスを生成
-asr.lang = "ja-JP"; // 言語（日本語）
-asr.interimResults = true; // 途中結果出力をオン
-asr.continuous = true; // 継続入力をオン
+const asr = new SpeechRecognition();
+asr.lang = "ja-JP";
+asr.interimResults = true;
+asr.continuous = true;
 
-let output = ''; // 出力
+let output = '';
 
-// CSVファイルを読み込んでパースする関数
-function parseCSV(csvData) {
-    const lines = csvData.split("\n");
-    const result = [];
-    const headers = lines[0].split(",");
-    
-    for (let i = 1; i < lines.length; i++) {
-        const obj = {};
-        const currentline = lines[i].split(",");
-        
-        for (let j = 0; j < headers.length; j++) {
-            obj[headers[j]] = currentline[j];
-        }
-        
-        result.push(obj);
-    }
-    
-    return result;
-}
+// CSVを読み込み、曜日ごとの時間割を保持する変数
+let timetable = {};
 
-// 曜日から対応する時間割を取得し、表として表示する関数
-function displayTimetableForToday(timetable) {
-    const now = new Date();
-    const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
-    const today = daysOfWeek[now.getDay()];
-    
-    const todayTimetable = timetable.find(row => row["曜日"] === today);
-    
-    if (todayTimetable) {
-        let tableHTML = "<table border='1'><tr><th>時限</th><th>科目</th></tr>";
-        Object.keys(todayTimetable).forEach((key, index) => {
-            if (key !== "曜日") {
-                tableHTML += `<tr><td>${key}</td><td>${todayTimetable[key]}</td></tr>`;
-            }
+function loadCSV() {
+    fetch('timetable.csv')
+        .then(response => response.text())
+        .then(data => {
+            let rows = data.split('\n');
+            rows.forEach(row => {
+                let cols = row.split(',');
+                let day = cols[0];
+                if (day) {
+                    timetable[day] = cols.slice(1);
+                }
+            });
         });
-        tableHTML += "</table>";
-        timetableDiv.innerHTML = tableHTML;
-    } else {
-        timetableDiv.innerHTML = "今日は時間割がありません。";
-    }
 }
 
-// 現在時刻を取得してフォーマットする関数
-function getCurrentTime() {
+// 現在の曜日を取得する関数
+function getCurrentDay() {
+    const days = ["日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜"];
     let now = new Date();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    return hours + "時" + minutes + "分";
+    return days[now.getDay()];
 }
 
 // 認識結果が出力されたときのイベントハンドラ
-asr.onresult = function(event){
-    let transcript = event.results[event.resultIndex][0].transcript; // 結果文字列
+asr.onresult = function(event) {
+    let transcript = event.results[event.resultIndex][0].transcript;
 
     let output_not_final = '';
-    if (event.results[event.resultIndex].isFinal) { // 結果が確定（Final）のとき
-	    asr.abort(); // 音声認識を停止
-	    
+    if (event.results[event.resultIndex].isFinal) {
+        asr.abort();
+
         let answer;
-        
+
         let keys = Object.keys(response);
         keys.forEach(function(key) {
             let flag = true;
             console.log(transcript);
             key.split(',').forEach(function(word) {              
                 let pattern = new RegExp(word);
-                let flag_test = pattern.test(transcript); // マッチしたらtrue, しなかったらfalse
-                flag = flag && flag_test; // 両方trueならtrue
+                let flag_test = pattern.test(transcript);
+                flag = flag && flag_test;
                 console.log(pattern + '+' + ':' + flag_test);
             });
 
-            if(flag){
-		        answer = response[key];
-                if(key === "今,何時"){
-                    // 現在の時刻を取得して応答にセット
+            if(flag) {
+                answer = response[key];
+                if(key === "今,何時") {
                     let currentTime = getCurrentTime();
                     answer = ["現在の時刻は " + currentTime + " です。"];
+                } else if (key === "今日,時間割") {
+                    let currentDay = getCurrentDay();
+                    if (timetable[currentDay]) {
+                        answer = ["今日は " + currentDay + " です。時間割は " + timetable[currentDay].join('、') + " です。"];
+                    } else {
+                        answer = ["今日は " + currentDay + " です。時間割は登録されていません。"];
+                    }
                 }
 
-                if (key === "今日,時間割") {
-                    fetch(csvFilePath)
-                        .then(response => response.text())
-                        .then(csvData => {
-                            const timetable = parseCSV(csvData);
-                            displayTimetableForToday(timetable);
-                        });
-                }
                 console.log(key + " : " + answer);
 
-                // リンクが含まれている場合、3秒後にそのリンクを新しいタブで開く
                 answer.forEach(function(ans) {
                     if(ans.startsWith("http")) {
                         setTimeout(function() {
                             window.open(ans, '_blank');
-                        }, 3000); // 3秒後に実行
+                        }, 3000);
                     } else {
                         output += transcript + ' => ' + ans + '<br>';
                         tts.text = ans;
@@ -168,32 +152,36 @@ asr.onresult = function(event){
             }
         });
 
-        if(typeof answer == 'undefined'){
-	        answer = "わかりません。でももっと賢くなります";
-    	}
-	
-	    // 再生が終了（end）ときのイベントハンドラ（終了したときに実行される）
-	    tts.onend = function(event){
-	        asr.start(); // 音声認識を再開
-	    }
+        if(typeof answer == 'undefined') {
+            answer = "わかりません。でももっと賢くなります";
+            output += transcript + ' => ' + answer + '<br>';
+            tts.text = answer;
+        }
 
-	    speechSynthesis.speak(tts); // 再生
-    } else { // 結果がまだ未確定のとき
+        tts.onend = function(event) {
+            asr.start();
+        }
+
+        speechSynthesis.speak(tts);
+    } else {
         output_not_final = '<span style="color:#ddd;">' + transcript + '</span>';
     }
     resultOutput.innerHTML = output + output_not_final;
 }
 
-// 開始ボタンのイベントハンドラ
 startButton.addEventListener('click', function() {
     asr.start();
 })
 
-// 停止ボタンのイベントハンドラ
 stopButton.addEventListener('click', function() {
     asr.abort();
     asr.stop();
 })
+
+// ページロード時にCSVを読み込む
+window.onload = function() {
+    loadCSV();
+}
 
 </script>
 
