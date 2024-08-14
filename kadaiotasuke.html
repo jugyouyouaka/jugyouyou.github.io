@@ -140,7 +140,11 @@ asr.onresult = function(event) {
                 } else if (key === "今日,時間割") {
                     let currentDay = getCurrentDay();
                     if (timetable[currentDay]) {
-                        answer = ["今日は " + currentDay + " です。時間割は " + timetable[currentDay].join('、') + " です。"];
+                        let periods = ["一限", "二限", "三限", "四限", "五限"];
+                        let formattedTimetable = timetable[currentDay].map((subject, index) => {
+                            return periods[index] + " " + subject;
+                        }).join("、");
+                        answer = ["今日は " + currentDay + " です。時間割は " + formattedTimetable + " です。"];
                     } else {
                         answer = ["今日は " + currentDay + " です。時間割は登録されていません。"];
                     }
